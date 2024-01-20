@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+			integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+			crossorigin=""
+		/>
+		<script
+			src="{{ url_for('static', filename='js/modernizr.js')}}"
+			data-turbolinks-track="reload"
+		></script>
+		<script
+			src="{{ url_for('static', filename='js/pace.min.js')}}"
+			data-turbolinks-track="reload"
+		></script>
+
+		<!-- Make sure you put this AFTER Leaflet's CSS -->
+		<script
+			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+			crossorigin=""
+		></script>
+		<link rel="stylesheet" href="map.css" />
+
+		<title>Location Finder</title>
+
+		<style>
+			@import url(https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,600);
+
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: "Roboto", sans-serif;
+			
+		}
+
+		.loader {
+			
+    position: absolute;
+	top: 50%;
+	left: 50%;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(#f07e6e, #84cdfa, #5ad1cd);
+    animation: animate 1.2s linear infinite;
+	display: none;
+}
+
+@keyframes animate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(#f07e6e, #84cdfa, #5ad1cd);
+}
+
+.loader span:nth-child(1) {
+    filter: blur(5px);
+}
+
+.loader span:nth-child(2) {
+    filter: blur(10px);
+}
+
+.loader span:nth-child(3) {
+    filter: blur(25px);
+}
+
+.loader span:nth-child(4) {
+    filter: blur(50px);
+}
+
+.loader:after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    background: #f1f1f1;
+    border: solid white 10px;
+    border-radius: 50%;
+	
+}
+		header {
+			z-index: 1;
+			position: fixed;
+			background: #22242a;
+			padding: 20px;
+			width: calc(100% - 0%);
+			top: 0;
+			height: 65px;
+		}
+
+		.left_area h3 {
+			color: #fff;
+			margin: 0;
+			text-transform: uppercase;
+			font-size: 22px;
+			font-weight: 900;
+		}
+
+		.left_area span {
+			color: #d500f9;
+		}
+
+		.logout_btn {
+			padding: 5px;
+			background: #d500f9;
+			text-decoration: none;
+			float: right;
+			margin-top: -30px;
+			margin-right: 40px;
+			border-radius: 2px;
+			font-size: 15px;
+			font-weight: 600;
+			color: #fff;
+			transition: 0.5s;
+			transition-property: background;
+		}
+
+		.logout_btn:hover {
+			background: #0b87a6;
+		}
+
+		.sidebar {
+			z-index: 1;
+			top: 0;
+			background: #2f323a;
+			margin-top: 70px;
+			padding-top: 30px;
+			position: fixed;
+			left: 0;
+			width: 250px;
+			height: calc(100% - 9%);
+			transition: 0.5s;
+			transition-property: left;
+			overflow-y: auto;
+		}
+
+		.profile_info {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.sidebar .profile_info .profile_image {
+			width: 100px;
+			height: 100px;
+			border-radius: 100px;
+			margin-bottom: 10px;
+		}
+
+		.sidebar .profile_info h4 {
+			color: #ccc;
+			margin-top: 0;
+			margin-bottom: 20px;
+		}
+
+		.sidebar a {
+			color: #fff;
+			display: block;
+			width: 100%;
+			line-height: 60px;
+			text-decoration: none;
+			padding-left: 40px;
+			box-sizing: border-box;
+			transition: 0.5s;
+			transition-property: background;
+		}
+
+		.sidebar a:hover {
+			background: #19b3d3;
+		}
+
+		.sidebar i {
+			padding-right: 10px;
+		}
+
+		label #sidebar_btn {
+			z-index: 1;
+			color: #fff;
+			position: fixed;
+			cursor: pointer;
+			left: 300px;
+			font-size: 20px;
+			margin: 5px 0;
+			transition: 0.5s;
+			transition-property: color;
+		}
+
+		label #sidebar_btn:hover {
+			color: #19b3d3;
+		}
+
+		#check:checked ~ .sidebar {
+			left: -185px;
+		}
+
+		#check:checked ~ .sidebar a span {
+			display: none;
+		}
+
+		#check:checked ~ .sidebar a {
+			font-size: 20px;
+			margin-left: 165px;
+			width: 100%;
+		}
+
+		.content {
+			width: (100% - 250px);
+			margin-top: 60px;
+			padding: 20px;
+			margin-left: 250px;
+			background: url(background.png) no-repeat;
+			background-position: center;
+			background-size: cover;
+			height: 100vh;
+			transition: 0.5s;
+		}
+
+		#check:checked ~ .content {
+			margin-left: 60px;
+		}
+
+		#check:checked ~ .sidebar .profile_info {
+			display: none;
+		}
+
+		#check {
+			display: none;
+		}
+
+		.mobile_nav {
+			display: none;
+		}
+
+		.content .card p {
+			background: #fff;
+			padding: 15px;
+			margin-bottom: 10px;
+			font-size: 14px;
+			opacity: 0.8;
+		}
+
+		/* Responsive CSS */
+
+		@media screen and (max-width: 780px) {
+			.sidebar {
+				display: none;
+			}
+
+			#sidebar_btn {
+				display: none;
+			}
+
+			.content {
+				margin-left: 0;
+				margin-top: 0;
+				padding: 10px 20px;
+				transition: 0s;
+			}
+
+			#check:checked ~ .content {
+				margin-left: 0;
+			}
+
+			.mobile_nav {
+				display: block;
+				width: calc(100% - 0%);
+			}
+
+			.nav_bar {
+				background: #222;
+				width: (100% - 0px);
+				margin-top: 70px;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 10px 20px;
+			}
+
+			.nav_bar .mobile_profile_image {
+				width: 50px;
+				height: 50px;
+				border-radius: 50%;
+			}
+
+			.nav_bar .nav_btn {
+				color: #fff;
+				font-size: 22px;
+				cursor: pointer;
+				transition: 0.5s;
+				transition-property: color;
+			}
+
+			.nav_bar .nav_btn:hover {
+				color: #19b3d3;
+			}
+
+			.mobile_nav_items {
+				background: #2f323a;
+				display: none;
+			}
+
+			.mobile_nav_items a {
+				color: #fff;
+				display: block;
+				text-align: center;
+				letter-spacing: 1px;
+				line-height: 60px;
+				text-decoration: none;
+				box-sizing: border-box;
+				transition: 0.5s;
+				transition-property: background;
+			}
+
+			.mobile_nav_items a:hover {
+				background: #19b3d3;
+			}
+
+			.mobile_nav_items i {
+				padding-right: 10px;
+			}
+
+			.active {
+				display: block;
+			}
+		}
+
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing: border-box;
+			-webkit-font-smoothing: antialiased;
+			-moz-font-smoothing: antialiased;
+			-o-font-smoothing: antialiased;
+			text-rendering: optimizeLegibility;
+		}
+
+		body {
+			font-family: "Open Sans", Helvetica, Arial, sans-serif;
+			font-weight: 300;
+			font-size: 12px;
+			line-height: 30px;
+			color: #777;
+			background: #0cf;
+		}
+
+		.container {
+			max-width: 400px;
+			width: 100%;
+			margin: 0 auto;
+			position: relative;
+		}
+
+		#contact input[type="text"],
+		#contact input[type="email"],
+		#contact input[type="tel"],
+		#contact input[type="url"],
+		#contact textarea,
+		#contact button[type="submit"] {
+			font: 400 12px/16px "Open Sans", Helvetica, Arial, sans-serif;
+		}
+
+		#contact {
+			background: #f9f9f9;
+			padding: 25px;
+			margin: 50px 0;
+		}
+
+		#contact h3 {
+			color: #f96;
+			display: block;
+			font-size: 30px;
+			font-weight: 400;
+		}
+
+		#contact h4 {
+			margin: 5px 0 15px;
+			display: block;
+			font-size: 13px;
+		}
+
+		fieldset {
+			border: medium none !important;
+			margin: 0 0 10px;
+			min-width: 100%;
+			padding: 0;
+			width: 100%;
+		}
+
+		#contact input[type="text"],
+		#contact input[type="email"],
+		#contact input[type="tel"],
+		#contact input[type="url"],
+		#contact textarea {
+			width: 100%;
+			border: 1px solid #ccc;
+			background: #fff;
+			margin: 0 0 5px;
+			padding: 10px;
+		}
+
+		#contact input[type="text"]:hover,
+		#contact input[type="email"]:hover,
+		#contact input[type="tel"]:hover,
+		#contact input[type="url"]:hover,
+		#contact textarea:hover {
+			-webkit-transition: border-color 0.3s ease-in-out;
+			-moz-transition: border-color 0.3s ease-in-out;
+			transition: border-color 0.3s ease-in-out;
+			border: 1px solid #aaa;
+		}
+
+		#contact textarea {
+			height: 100px;
+			max-width: 100%;
+			resize: none;
+		}
+
+		#contact button[type="submit"] {
+			cursor: pointer;
+			width: 100%;
+			border: none;
+			background: #0cf;
+			color: #fff;
+			margin: 0 0 5px;
+			padding: 10px;
+			font-size: 15px;
+		}
+
+		#contact button[type="submit"]:hover {
+			background: #09c;
+			-webkit-transition: background 0.3s ease-in-out;
+			-moz-transition: background 0.3s ease-in-out;
+			transition: background-color 0.3s ease-in-out;
+		}
+
+		#contact button[type="submit"]:active {
+			box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+		}
+
+		#contact input:focus,
+		#contact textarea:focus {
+			outline: 0;
+			border: 1px solid #999;
+		}
+		::-webkit-input-placeholder {
+			color: #888;
+		}
+		:-moz-placeholder {
+			color: #888;
+		}
+		::-moz-placeholder {
+			color: #888;
+		}
+		:-ms-input-placeholder {
+			color: #888;
+		}
+
+
+
+			body {
+				padding: 0;
+				margin: 0;
+			}
+			#map {
+				height: 100vh;
+				width: 70vwh;
+				z-index: 0;
+				margin-top: 70px;
+			}
+
+			.container {
+				padding: 0;
+				position: absolute;
+				/*display: inline-block;*/
+				top: 0px;
+				right: 0;
+				border-radius: 10px;
+				box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.9);
+				transform: perspective(1000px);
+				color: black;
+
+				width: 250px;
+				height: 100vh;
+				/*background-color: #f0f0f0;*/
+				overflow-x: auto;
+				white-space: nowrap;
+				z-index: 1;
+			}
+			#locationsList {
+				width: 220px;
+				padding: 10px 10px 10px 10px;
+				background-color: #f8f8f8;
+				border-radius: 5px;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+				font-family: Arial, sans-serif;
+				margin-left: 7px;
+			}
+
+			.location-item {
+				margin-bottom: 10px;
+				border-bottom: 1px solid #ccc;
+				padding-bottom: 5px;
+			}
+
+			.location-item:last-child {
+				border-bottom: none;
+			}
+			.button {
+				color: black;
+
+				background-color: #ffffff;
+				padding: 5px;
+				border-radius: 10px;
+				font-weight: bold;
+				font-size: 15px;
+				margin: 5px 0px 5px 5px;
+			}
+			p {
+				width: inherit; /* width: 100px; */
+				white-space: pre-wrap;
+			}
+
+			.modal {
+				display: none;
+				position: fixed;
+				z-index: 1;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				overflow: auto;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+
+			.modal-content {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				background-color: #fefefe;
+				margin: 15% auto;
+				border: 1px solid #888;
+				width: 30%;
+				padding: 20px;
+				border-radius: 10px;
+			}
+
+			#companyForm {
+				display: flex;
+				flex-direction: column;
+			}
+
+			#companyForm label,
+			#companyForm input,
+			#companyForm select {
+				cursor: pointer;
+			}
+
+			#companyForm input[type="text"],
+			#companyForm select {
+				width: 100%;
+			}
+
+			#companyForm input[type="submit"] {
+				background-color: #4caf50;
+				color: #fff;
+				cursor: pointer;
+			}
+
+			#companyForm input[type="submit"]:hover {
+				background-color: #45a049;
+			}
+
+			#notification {
+				float: right;
+				position: absolute;
+				color: black;
+				padding: 10px;
+				background-color: #f7f7f7;
+				border-radius: 5px;
+				opacity: 1;
+				animation: fadeOut 10s ease-in-out;
+			}
+			@keyframes fadeOut {
+				from {
+					opacity: 1;
+				}
+				to {
+					opacity: 0;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<input type="checkbox" id="check" />
+		<header>
+			<label for="check">
+				<i class="fas fa-bars" id="sidebar_btn"></i>
+			</label>
+			<div class="left_area">
+				<h3>Start<span>/Smart</span></h3>
+			</div>
+			<div class="right_area">
+				<a href="#" class="logout_btn">Logout</a>
+			</div>
+		</header>
+		<div class="mobile_nav">
+			<div class="mobile_nav_items">
+				<a href="/dashboard"
+					><i class="fas fa-desktop"></i><span>Home</span></a
+				>
+				<a href="#"><i class="fas fa-cogs"></i><span>Validation</span></a>
+				<a href="#"><i class="fas fa-table"></i><span>Location finder</span></a>
+			</div>
+		</div>
+		<div class="sidebar">
+			<a href="/dashboard"
+				><i class="fas fa-desktop"></i><span>Home</span></a
+			>
+			<a href="/validation"><i class="fas fa-cogs"></i><span>Validation</span></a>
+			<a href="#"><i class="fas fa-table"></i><span>Location finder</span></a>
+		</div>
+
+		<div id="map"></div>
+		<div id="map" class="container content">
+			<button
+				id="submit"
+				class="button"
+				style="width: 110px"
+				onclick="onSubmitButtonClick()"
+			>
+				submit
+			</button>
+			<button
+				class="button"
+				id="tryagainbutton"
+				onclick="window.location.replace('http://127.0.0.1:5000/frontend/map.html')"
+				style="width: 110px"
+			>
+				Reset
+			</button>
+			<div id="locationsList">
+				<div id="notification">
+					<p style="font-size: 20px">
+						Please go to your prefered city and mark the locations by
+						clicking.Then click <b>submit</b> and wait.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div id="myModal" class="modal">
+			<div class="modal-content">
+				<form id="companyForm" style="color:black; font-weight: bold;">
+					<label for="companyName">Company Name</label>
+					<input type="text" id="companyName" name="companyName" required />
+
+					<label for="companyType">Company Type</label>
+					<input type="text" id="companyType" name="companyType" required />
+
+					<label for="companySize">Company Size</label>
+					<select
+						id="companySize"
+						name="companySize"
+						required
+						style="background-color: white"
+					>
+						<option value="large">Large</option>
+						<option value="medium">Medium</option>
+						<option value="small">Small</option>
+					</select>
+
+					<label for="companyLocation">Company Location</label>
+					<input
+						type="text"
+						id="companyLocation"
+						name="companyLocation"
+						required
+					/>
+
+					<input border: 1px solid #ccc; style="margin-top: 10px; border-radius:
+					10px; padding: 10px;" type="submit" value="Submit" />
+				</form>
+			</div>
+		</div>
+		<div class="loader">
+			<span></span>
+			<span></span>
+			<span></span>
+			<span></span>
+		</div>
+
+		<script>
+			window.addEventListener("DOMContentLoaded", function () {
+				const notification = document.getElementById("notification");
+
+				setTimeout(function () {
+					notification.style.display = "none";
+				}, 10000);
+			});
+
+			document
+				.getElementById("companyForm")
+				.addEventListener("submit", function (e) {
+					e.preventDefault();
+
+					var companyName = document.getElementById("companyName").value;
+					var companyType = document.getElementById("companyType").value;
+					var companyLocation =
+						document.getElementById("companyLocation").value;
+					var companySize = document.getElementById("companySize").value;
+
+					localStorage.setItem("company_name", companyName);
+					localStorage.setItem("Company_Type", companyType);
+					localStorage.setItem("Company_location", companyLocation);
+					localStorage.setItem("Company_size", companySize);
+
+					document.getElementById("myModal").style.display = "none";
+				});
+
+			var map = L.map("map").setView([15, 77], 6);
+			L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+				maxZoom: 19,
+				attribution:
+					'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+			}).addTo(map);
+			var selectedLocations = [];
+			var details = {
+				cname: localStorage.getItem("company_name"),
+				ctype: localStorage.getItem("Company_Type"),
+				cloc: localStorage.getItem("Company_location"),
+				csize: localStorage.getItem("Company_size"),
+			};
+
+			var markers = [];
+
+			function onNewLocationButtonClick() {
+				map.on("click", onMapClick);
+			}
+
+			function onMapClick(e) {
+				var clickedLat = e.latlng.lat;
+				var clickedLng = e.latlng.lng;
+
+				var stepIcon = L.icon({
+					iconUrl: "https://cdn-icons-png.flaticon.com/512/3082/3082383.png",
+					iconSize: [30, 30],
+				});
+
+				var marker = L.marker([clickedLat, clickedLng], { icon: stepIcon });
+
+				marker.addTo(map);
+
+				markers.push(marker);
+				var locationDetails = {
+					lat: clickedLat,
+					lng: clickedLng,
+				};
+				var isLocationAlreadySelected = selectedLocations.some(function (
+					location
+				) {
+					return (
+						location.lat === locationDetails.lat &&
+						location.lng === locationDetails.lng
+					);
+				});
+
+				if (!isLocationAlreadySelected) {
+					selectedLocations.push(locationDetails);
+				}
+
+				updateLocationsList();
+
+				map.off("click", onMapClick);
+			}
+
+			function updateLocationsList() {
+				var locationsListDiv = document.getElementById("locationsList");
+				locationsListDiv.innerHTML = "";
+
+				selectedLocations.forEach(function (location, index) {
+					var locationItem = document.createElement("div");
+					locationItem.innerHTML = `<b>Location ${
+						index + 1
+					}:</b><br>Latitude: ${location.lat}<br>Longitude: ${location.lng}
+                <br><button class="button" onclick="deleteLocation(${index})">Delete</button><br><br>`;
+					locationsListDiv.appendChild(locationItem);
+				});
+			}
+
+			function deleteLocation(index) {
+				selectedLocations.splice(index, 1);
+				var marker = markers[index];
+				map.removeLayer(marker);
+				markers.splice(index, 1);
+				updateLocationsList();
+			}
+
+			function BlaaMap() {
+				markers.forEach(function (marker) {
+					map.removeLayer(marker);
+				});
+
+				markers = [];
+				selectedLocations = [];
+			}
+
+			window.onload = function () {
+				var modal = document.getElementById("myModal");
+				var span = document.getElementsByClassName("close")[0];
+
+				modal.style.display = "block";
+
+				span.onclick = function () {
+					modal.style.display = "none";
+				};
+			};
+
+			const onSubmitButtonClick = async () => {
+				try {
+					const apiUrl = "http://127.0.0.1:5000/rank";
+
+					const cords = selectedLocations
+						.map((location) => `${location.lat},${location.lng}`)
+						.join(",");
+					const formdata = new FormData();
+					formdata.append("cords", cords);
+					formdata.append("type_", details.ctype);
+					formdata.append("size", details.csize);
+
+					const requestOptions = {
+						method: "POST",
+						body: formdata,
+						redirect: "follow",
+					};
+
+					console.log(requestOptions);
+					let loader=document.getElementsByClassName("loader")[0]
+					loader.style.display="block"
+					const response = await fetch(apiUrl, requestOptions);
+					
+					if (response.ok) {
+						loader.style.display="none"
+						let data = await response.json(); // Parse the response as JSON
+
+						console.log("Response:", data);
+
+						addresultmarker(data);
+						BlaaMap();
+						localStorage.clear();
+					} else {
+						console.error("Failed to submit locations:", response.statusText);
+					}
+				} catch (error) {
+					console.error("Error sending data to Flask:", error);
+				}
+			};
+
+			function deleteAllMarkers() {
+				for (let i = 0; i < markers.length; i++) {
+					map.removeLayer(markers[i]);
+				}
+				var locationsListDiv = document.getElementById("locationsList");
+				locationsListDiv.innerHTML = "";
+				selectedLocations = [];
+			}
+
+			// Function to add new ranked marker
+
+			const addresultmarker = (response) => {
+				const observations1 = response["observation1"];
+				const observations2 = response["observation2"];
+				const competitors = response.competitors;
+				const rank = response["rank"];
+				console.log(observations1, observations2, competitors, rank);
+
+				if (
+					!observations1 ||
+					!observations2 ||
+					!rank ||
+					observations1.length !== observations2.length ||
+					observations1.length !== rank.length
+				) {
+					console.error("Invalid response data.");
+					return;
+				}
+
+				//competitor
+				const competitorMarkersGroup = L.layerGroup();
+
+				for (const competitorName in competitors) {
+					const competitor = competitors[competitorName][0]; // Access the first element of the array
+					const lat = competitor.lat;
+					const lng = competitor.lng;
+
+					const competitorMarker = L.circle([lat, lng], {
+						color: "red",
+						fillColor: "#f03",
+						fillOpacity: 0.5,
+						radius: 20,
+					});
+
+					// Set the competitor's name as the tooltip content
+					competitorMarker.bindTooltip(competitorName, {
+						permanent: false,
+						direction: "top",
+						offset: [0, -10], // Adjust the offset as needed
+					});
+
+					competitorMarkersGroup.addLayer(competitorMarker);
+				}
+
+				// Add the competitor markers layer group to the map
+				competitorMarkersGroup.addTo(map);
+
+				const newResultMarkers = observations1.map((observation, i) => {
+					const marker = L.marker([
+						selectedLocations[i].lat,
+						selectedLocations[i].lng,
+					]);
+
+					const j = rank[i];
+					const i_ = i + 1;
+
+					let tooltipContent = `Location ${i_} <br> Ranked: ${j}`;
+
+					if (observations1[i] !== "") {
+						tooltipContent += `<br>${observations1[i]}`;
+					}
+
+					if (observations2[i] !== "") {
+						tooltipContent += `<br>${observations2[i]}`;
+					}
+
+					marker.bindTooltip(tooltipContent, {
+						permanent: true,
+					});
+
+					// Add the marker to the map
+					marker.addTo(map);
+
+					return marker;
+				});
+			};
+
+			var newLocationButton = document.getElementById("newLocationButton");
+			document.addEventListener("click", onNewLocationButtonClick);
+
+			var submitLocationsButton = document.getElementById(
+				"submitLocationsButton"
+			);
+			submitLocationsButton.addEventListener("click", onSubmitButtonClick);
+		</script>
+	</body>
+</html>

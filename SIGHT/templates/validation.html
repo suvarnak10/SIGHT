@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Validation</title>
+	</head>
+	<body>
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+			body {
+				margin: 0;
+				padding: 0;
+				font-family: "Roboto", sans-serif;
+			}
+
+			header {
+				z-index: 1;
+				position: fixed;
+				background: #22242a;
+				padding: 20px;
+				width: calc(100% - 0%);
+				top: 0;
+				height: 30px;
+			}
+
+			.left_area h3 {
+				color: #fff;
+				margin: 0;
+				text-transform: uppercase;
+				font-size: 22px;
+				font-weight: 900;
+			}
+
+			.left_area span {
+				color: #19b3d3;
+			}
+
+			.logout_btn {
+				padding: 5px;
+				background: #19b3d3;
+				text-decoration: none;
+				float: right;
+				margin-top: -30px;
+				margin-right: 40px;
+				border-radius: 2px;
+				font-size: 15px;
+				font-weight: 600;
+				color: #fff;
+				transition: 0.5s;
+				transition-property: background;
+			}
+
+			.logout_btn:hover {
+				background: #0b87a6;
+			}
+
+			.sidebar {
+				z-index: 1;
+				top: 0;
+				background: #2f323a;
+				margin-top: 70px;
+				padding-top: 30px;
+				position: fixed;
+				left: 0;
+				width: 250px;
+				height: calc(100% - 9%);
+				transition: 0.5s;
+				transition-property: left;
+				overflow-y: auto;
+				font-family: "Roboto", sans-serif;
+			}
+
+			.profile_info {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.sidebar .profile_info .profile_image {
+				width: 100px;
+				height: 100px;
+				border-radius: 100px;
+				margin-bottom: 10px;
+			}
+
+			.sidebar .profile_info h4 {
+				color: #ccc;
+				margin-top: 0;
+				margin-bottom: 20px;
+			}
+
+			.sidebar a {
+				color: #fff;
+				display: block;
+				width: 100%;
+				line-height: 60px;
+				text-decoration: none;
+				padding-left: 40px;
+				box-sizing: border-box;
+				transition: 0.5s;
+				transition-property: background;
+			}
+
+			.sidebar a:hover {
+				background: #19b3d3;
+			}
+
+			.sidebar i {
+				padding-right: 10px;
+			}
+
+			label #sidebar_btn {
+				z-index: 1;
+				color: #fff;
+				position: fixed;
+				cursor: pointer;
+				left: 300px;
+				font-size: 20px;
+				margin: 5px 0;
+				transition: 0.5s;
+				transition-property: color;
+			}
+
+			label #sidebar_btn:hover {
+				color: #19b3d3;
+			}
+
+			#check:checked ~ .sidebar {
+				left: -185px;
+			}
+
+			#check:checked ~ .sidebar a span {
+				display: none;
+			}
+
+			#check:checked ~ .sidebar a {
+				font-size: 20px;
+				margin-left: 165px;
+				width: 100%;
+			}
+
+			.content {
+				width: (100% - 250px);
+				margin-top: 60px;
+				padding: 20px;
+				margin-left: 250px;
+				background: url(background.png) no-repeat;
+				background-position: center;
+				background-size: cover;
+				height: 100vh;
+				transition: 0.5s;
+			}
+
+			#check:checked ~ .content {
+				margin-left: 60px;
+			}
+
+			#check:checked ~ .sidebar .profile_info {
+				display: none;
+			}
+
+			#check {
+				display: none;
+			}
+
+			.mobile_nav {
+				display: none;
+			}
+
+			#viewBtn {
+				background-color: #4caf50;
+				color: white;
+				padding: 10px 24px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 16px;
+				margin: 4px 2px;
+				cursor: pointer;
+				border: none;
+				border-radius: 4px;
+			}
+
+			#mainContent.modal-open {
+				filter: blur(2px);
+			}
+			.modal {
+				display: none;
+				position: fixed;
+				z-index: 1;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				overflow: auto;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+
+			.modal-content {
+				background-color: #fefefe;
+				margin: 15% auto;
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%;
+			}
+
+			.close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+			}
+
+			.close:hover,
+			.close:focus {
+				color: black;
+				text-decoration: none;
+				cursor: pointer;
+			}
+
+			#contact {
+				width: 80%;
+				margin: auto;
+				background: #f9f9f9;
+				padding: 30px;
+				border: 1px solid #c1c1c1;
+				border-radius: 8px;
+				font-family: "Roboto", sans-serif;
+			}
+
+			#contact h3 {
+				margin-bottom: 20px;
+				font-weight: 300;
+				font-size: 24px;
+			}
+
+			#contact fieldset {
+				border: none;
+				margin-bottom: 20px;
+			}
+
+			#contact input {
+				width: 50%; /* Adjust as needed */
+				padding: 10px;
+				border: 1px solid #c1c1c1;
+				border-radius: 4px;
+				box-sizing: border-box;
+				margin-bottom: 20px;
+				margin-left: auto;
+				margin-right: auto;
+				display: block;
+				font-family: "Roboto", sans-serif;
+			}
+			#contact textarea {
+				width: 50%; /* Same as the input width */
+				height: 100px; /* Adjust as needed */
+				padding: 10px;
+				border: 1px solid #c1c1c1;
+				border-radius: 4px;
+				box-sizing: border-box;
+				margin-bottom: 20px;
+				margin-left: auto;
+				margin-right: auto;
+				display: block;
+				font-family: "Roboto", sans-serif;
+			}
+
+			#contact input[type="submit"] {
+				width: 30%; /* Adjust as needed */
+				background-color: #4caf50;
+				color: white;
+				padding: 15px;
+				border: none;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 20px;
+				display: block;
+				margin: 0 auto;
+			}
+
+			/* Responsive CSS */
+
+			@media screen and (max-width: 780px) {
+				.sidebar {
+					display: none;
+				}
+
+				#sidebar_btn {
+					display: none;
+				}
+
+				.content {
+					margin-left: 0;
+					margin-top: 0;
+					padding: 10px 20px;
+					transition: 0s;
+				}
+
+				#check:checked ~ .content {
+					margin-left: 0;
+				}
+
+				.mobile_nav {
+					display: block;
+					width: calc(100% - 0%);
+				}
+
+				.nav_bar {
+					background: #222;
+					width: (100% - 0px);
+					margin-top: 70px;
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					padding: 10px 20px;
+				}
+
+				.nav_bar .mobile_profile_image {
+					width: 50px;
+					height: 50px;
+					border-radius: 50%;
+				}
+
+				.nav_bar .nav_btn {
+					color: #fff;
+					font-size: 22px;
+					cursor: pointer;
+					transition: 0.5s;
+					transition-property: color;
+				}
+
+				.nav_bar .nav_btn:hover {
+					color: #19b3d3;
+				}
+
+				.mobile_nav_items {
+					background: #2f323a;
+					display: none;
+				}
+
+				.mobile_nav_items a {
+					color: #fff;
+					display: block;
+					text-align: center;
+					letter-spacing: 1px;
+					line-height: 60px;
+					text-decoration: none;
+					box-sizing: border-box;
+					transition: 0.5s;
+					transition-property: background;
+				}
+
+				.mobile_nav_items a:hover {
+					background: #19b3d3;
+				}
+
+				.mobile_nav_items i {
+					padding-right: 10px;
+				}
+
+				.active {
+					display: block;
+				}
+			}
+		</style>
+		<header>
+			<label for="check">
+				<i class="fas fa-bars" id="sidebar_btn"></i>
+			</label>
+			<div class="left_area">
+				<h3>Start<span>Smart</span></h3>
+			</div>
+			<div class="right_area">
+				<a href="#" class="logout_btn">Logout</a>
+			</div>
+		</header>
+		<div id="mainContent">
+			<div class="mobile_nav">
+				<div class="mobile_nav_items">
+					<a href="dashboard.html"><i class="fas fa-desktop"></i><span>Home</span></a>
+					<a href="./validation.html"
+						><i class="fas fa-cogs"></i><span>Validation</span></a
+					>
+					<a href="./map.html"
+						><i class="fas fa-table"></i><span>Location finder</span></a
+					>
+				</div>
+			</div>
+			<div class="sidebar">
+				<a href="{{url_for('dashboard')}}"><i class="fas fa-desktop"></i><span>Home</span></a>
+				<a href="{{url_for('validation')}}"
+					><i class="fas fa-cogs"></i><span>Validation</span></a
+				>
+				<a href="{{url_for('map')}}"
+					><i class="fas fa-table"></i><span>Location finder</span></a
+				>
+			</div>
+
+			<div class="content">
+				<form id="contact" action="" method="post">
+					<h3 style="text-align: center">Validate your business Idea</h3>
+					<fieldset>
+						<input
+							placeholder="Industry"
+							type="text"
+							name="industry"
+							tabindex="1"
+							required
+							autofocus
+						/>
+					</fieldset>
+					<fieldset>
+						<textarea
+							placeholder="Provide a description of your business"
+							name="description"
+							tabindex="5"
+							required
+						></textarea>
+					</fieldset>
+					<fieldset>
+						<input
+							type="submit"
+							name="submit"
+							type="submit"
+							id="contact-submit"
+							data-submit="...Sending"
+							value="submit"
+						>
+							
+					</input>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+
+		<div id="myModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<p id="apiResult">Loading...</p>
+			</div>
+		</div>
+		<script>
+			document
+				.getElementById("contact")
+				.addEventListener("submit", function (event) {
+					event.preventDefault();
+
+					var industryField = document.getElementsByName("industry")[0];
+					var descriptionField = document.getElementsByName("description")[0];
+
+					var industry = industryField.value;
+					var description = descriptionField.value;
+
+					// Clear the input fields
+					industryField.value = "";
+					descriptionField.value = "";
+
+					// Show the modal
+					var modal = document.getElementById("myModal");
+					modal.style.display = "block";
+
+					// When the user clicks on <span> (x), close the modal
+					document.getElementsByClassName("close")[0].onclick = function () {
+						modal.style.display = "none";
+					};
+
+					var formdata = new FormData();
+					formdata.append("type_", industry);
+					formdata.append("description", description);
+					var requestOptions = {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: formdata,
+						redirect: "follow",
+					};
+
+					// Fetch the API result
+					fetch("http://127.0.0.1:5000/validator", requestOptions)
+						.then((response) => response.text())
+						.then((result) => {
+							// Display the result in the modal
+							document.getElementById("apiResult").textContent = result;
+						})
+						.catch((error) => console.log("error", error));
+				});
+		</script>
+	</body>
+</html>

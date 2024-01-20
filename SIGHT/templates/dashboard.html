@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Dashboard</title>
+	</head>
+	<body>
+		<style>
+			@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+			body {
+				margin: 0;
+				padding: 0;
+				font-family: "Roboto", sans-serif;
+			}
+
+			header {
+				z-index: 1;
+				position: fixed;
+				background: #22242a;
+				padding: 20px;
+				width: calc(100% - 0%);
+				top: 0;
+				height: 30px;
+			}
+
+			.left_area h3 {
+				color: #fff;
+				margin: 0;
+				text-transform: uppercase;
+				font-size: 22px;
+				font-weight: 900;
+			}
+
+			.left_area span {
+				color: #19b3d3;
+			}
+
+			.logout_btn {
+				padding: 5px;
+				background: #19b3d3;
+				text-decoration: none;
+				float: right;
+				margin-top: -30px;
+				margin-right: 40px;
+				border-radius: 2px;
+				font-size: 15px;
+				font-weight: 600;
+				color: #fff;
+				transition: 0.5s;
+				transition-property: background;
+			}
+
+			.logout_btn:hover {
+				background: #0b87a6;
+			}
+
+			.sidebar {
+				z-index: 1;
+				top: 0;
+				background: #2f323a;
+				margin-top: 70px;
+				padding-top: 30px;
+				position: fixed;
+				left: 0;
+				width: 250px;
+				height: calc(100% - 9%);
+				transition: 0.5s;
+				transition-property: left;
+				overflow-y: auto;
+				font-family: "Roboto", sans-serif;
+			}
+
+			.profile_info {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.sidebar .profile_info .profile_image {
+				width: 100px;
+				height: 100px;
+				border-radius: 100px;
+				margin-bottom: 10px;
+			}
+
+			.sidebar .profile_info h4 {
+				color: #ccc;
+				margin-top: 0;
+				margin-bottom: 20px;
+			}
+
+			.sidebar a {
+				color: #fff;
+				display: block;
+				width: 100%;
+				line-height: 60px;
+				text-decoration: none;
+				padding-left: 40px;
+				box-sizing: border-box;
+				transition: 0.5s;
+				transition-property: background;
+			}
+
+			.sidebar a:hover {
+				background: #19b3d3;
+			}
+
+			.sidebar i {
+				padding-right: 10px;
+			}
+
+			label #sidebar_btn {
+				z-index: 1;
+				color: #fff;
+				position: fixed;
+				cursor: pointer;
+				left: 300px;
+				font-size: 20px;
+				margin: 5px 0;
+				transition: 0.5s;
+				transition-property: color;
+			}
+
+			label #sidebar_btn:hover {
+				color: #19b3d3;
+			}
+
+			#check:checked ~ .sidebar {
+				left: -185px;
+			}
+
+			#check:checked ~ .sidebar a span {
+				display: none;
+			}
+
+			#check:checked ~ .sidebar a {
+				font-size: 20px;
+				margin-left: 165px;
+				width: 100%;
+			}
+
+			.content {
+				width: (100% - 250px);
+				margin-top: 60px;
+				padding: 20px;
+				margin-left: 250px;
+				background: url(background.png) no-repeat;
+				background-position: center;
+				background-size: cover;
+				height: 100vh;
+				transition: 0.5s;
+			}
+
+			#check:checked ~ .content {
+				margin-left: 60px;
+			}
+
+			#check:checked ~ .sidebar .profile_info {
+				display: none;
+			}
+
+			#check {
+				display: none;
+			}
+
+			.mobile_nav {
+				display: none;
+			}
+
+			.content .card p {
+				background: #fff;
+				padding: 15px;
+				margin-bottom: 10px;
+				font-size: 14px;
+				opacity: 0.8;
+			}
+
+			.card {
+				box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+				transition: 0.3s;
+				width: 20%;
+				border-radius: 5px;
+				padding: 10px;
+				text-align: center;
+			}
+
+			.card:hover {
+				box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+			}
+
+			.card p {
+				color: #333;
+				font-size: 18px;
+			}
+
+			#viewBtn {
+				background-color: #4caf50;
+				color: white;
+				padding: 10px 24px;
+				text-align: center;
+				text-decoration: none;
+				display: inline-block;
+				font-size: 16px;
+				margin: 4px 2px;
+				cursor: pointer;
+				border: none;
+				border-radius: 4px;
+			}
+
+			#mainContent.modal-open {
+				filter: blur(2px);
+			}
+			.modal {
+				display: none;
+				position: fixed;
+				z-index: 1;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				overflow: auto;
+				background-color: rgba(0, 0, 0, 0.4);
+			}
+
+			.modal-content {
+				background-color: #fefefe;
+				margin: 15% auto;
+				padding: 20px;
+				border: 1px solid #888;
+				width: 80%;
+			}
+
+			.close {
+				color: #aaa;
+				float: right;
+				font-size: 28px;
+				font-weight: bold;
+			}
+
+			.close:hover,
+			.close:focus {
+				color: black;
+				text-decoration: none;
+				cursor: pointer;
+			}
+
+			/* Responsive CSS */
+
+			@media screen and (max-width: 780px) {
+				.sidebar {
+					display: none;
+				}
+
+				#sidebar_btn {
+					display: none;
+				}
+
+				.content {
+					margin-left: 0;
+					margin-top: 0;
+					padding: 10px 20px;
+					transition: 0s;
+				}
+
+				#check:checked ~ .content {
+					margin-left: 0;
+				}
+
+				.mobile_nav {
+					display: block;
+					width: calc(100% - 0%);
+				}
+
+				.nav_bar {
+					background: #222;
+					width: (100% - 0px);
+					margin-top: 70px;
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					padding: 10px 20px;
+				}
+
+				.nav_bar .mobile_profile_image {
+					width: 50px;
+					height: 50px;
+					border-radius: 50%;
+				}
+
+				.nav_bar .nav_btn {
+					color: #fff;
+					font-size: 22px;
+					cursor: pointer;
+					transition: 0.5s;
+					transition-property: color;
+				}
+
+				.nav_bar .nav_btn:hover {
+					color: #19b3d3;
+				}
+
+				.mobile_nav_items {
+					background: #2f323a;
+					display: none;
+				}
+
+				.mobile_nav_items a {
+					color: #fff;
+					display: block;
+					text-align: center;
+					letter-spacing: 1px;
+					line-height: 60px;
+					text-decoration: none;
+					box-sizing: border-box;
+					transition: 0.5s;
+					transition-property: background;
+				}
+
+				.mobile_nav_items a:hover {
+					background: #19b3d3;
+				}
+
+				.mobile_nav_items i {
+					padding-right: 10px;
+				}
+
+				.active {
+					display: block;
+				}
+			}
+			.abc{
+				border-radius: 10px;
+				border-color: #222;
+			}
+		</style>
+		<header>
+			<label for="check">
+				<i class="fas fa-bars" id="sidebar_btn"></i>
+			</label>
+			<div class="left_area">
+				<h3>Start<span>Smart</span></h3>
+			</div>
+			<div class="right_area">
+				<a href="#" class="logout_btn">Logout</a>
+			</div>
+		</header>
+		<div id="mainContent">
+			<div class="mobile_nav">
+				<div class="mobile_nav_items">
+					<a href="#"><i class="fas fa-desktop"></i><span>Home</span></a>
+					<a href="/validation"
+						><i class="fas fa-cogs"></i><span>Validation</span></a
+					>
+					<a href="/map"
+						><i class="fas fa-table"></i><span>Location finder</span></a
+					>
+				</div>
+			</div>
+			<div class="sidebar">
+				<a href="/dashboard"><i class="fas fa-desktop"></i><span>Home</span></a>
+				<a href="/validation"
+					><i class="fas fa-cogs"></i><span>Validation</span></a
+				>
+				<a href="/map"
+					><i class="fas fa-table"></i><span>Location finder</span></a
+				>
+			</div>
+
+			<div style="text-align: center;width: 115%;padding-top: 90px;padding-left: -10px;"  class="s-info">
+
+				<div class="row info-wrapper">
+		
+					<div class="col-seven tab-full info-main">
+						<h1>How to Use StartSmart?<br>'Your Guide to Business Success'</h1>
+						<p>
+						<div class="abc">
+							<h2 style="text-align: center;color: #ec008c;">Step-1</h2>
+							<h3>Validate Your Business</h3>
+						  <strong><strong>Tell Us About Your Business:</strong></strong> Share some details about your business type, size, and industry.<br>The more we know, the better we can help you.<br>
+		
+						   <br>
+						</div>
+						   <div class="abc">
+						   <h2 style="text-align: center;color: #ec008c;">Step-2</h2>
+						   <h3>Choose Your Desired Locations</h3>
+						   <strong><strong>Choose Your Desired Locations:</strong></strong>Select all the locations where you plan to place your Business.<br>You just need to place the marker in the map and click submit.<br><br>	
+						  
+						   </div>
+						   <div class="abc">
+						   <h2 style="text-align: center;color: #ec008c;">Step-3</h2>
+						   <h3>Explore Your Options</h3>
+						    Once the analysis is complete,you will be presented with a list of ranked locations and review the detailed information<br> provided on Validation step and Choose wisely.
+							</div>
+						</p>
+					</div>
+		
+				</div>  <!-- end info wrapper -->
+		
+			</div> <!-- end s-info -->
+		
+		
+
+		<div id="myModal" class="modal">
+			<div class="modal-content">
+				<span class="close">&times;</span>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+			</div>
+		</div>
+		<script>
+			document.getElementById("viewBtn").addEventListener("click", function () {
+				// Show the modal
+				var modal = document.getElementById("myModal");
+				modal.style.display = "block";
+
+				// Add the blur effect
+				document.body.classList.add("modal-open");
+
+				// When the user clicks on <span> (x), close the modal
+				document.getElementsByClassName("close")[0].onclick = function () {
+					modal.style.display = "none";
+					document.body.classList.remove("modal-open");
+				};
+			});
+
+			window.onload = function () {
+				var description = document.getElementById("cardDescription");
+				var words = description.textContent.split(" ");
+
+				if (words.length > 10) {
+					description.textContent = words.slice(0, 10).join(" ") + "...";
+				}
+			};
+		</script>
+	</body>
+</html>
